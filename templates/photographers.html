@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browse Photographers - Photography Booking Platform</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <h1>📸 Photography Booking</h1>
+            </div>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                <li><a href="{{ url_for('photographers') }}" class="nav-link">Browse Photographers</a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link logout-btn">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <h1>Our Professional Photographers</h1>
+            <p>Choose from our talented pool of photographers for your special event</p>
+        </div>
+    </div>
+
+    <!-- Photographers Grid -->
+    <div class="container">
+        <div class="photographers-grid">
+            {% if photographers %}
+                {% for photographer in photographers %}
+                    <!-- Photographer Card -->
+                    <div class="photographer-card">
+                        <div class="photographer-header">
+                            {% if photographer.image %}
+                                <img src="{{ photographer.image }}" alt="{{ photographer.name }}" class="photographer-image">
+                            {% else %}
+                                <div class="photographer-avatar">
+                                    📷
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="photographer-details">
+                            <h3>{{ photographer.name }}</h3>
+                            <p class="photographer-specialization">{{ photographer.specialization }}</p>
+                            
+                            <div class="photographer-info-grid">
+                                <div class="info-item">
+                                    <label>Experience</label>
+                                    <p>{{ photographer.experience }} years</p>
+                                </div>
+                                <div class="info-item">
+                                    <label>Location</label>
+                                    <p>{{ photographer.location }}</p>
+                                </div>
+                            </div>
+                            
+                            <p class="photographer-bio">{{ photographer.bio }}</p>
+                            
+                            {% if photographer.skills %}
+                            <div class="photographer-skills">
+                                <label>Skills</label>
+                                <div class="skills-tags">
+                                    {% for skill in photographer.skills %}
+                                        <span class="skill-tag">{{ skill }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            {% if photographer.availability %}
+                            <div class="photographer-availability">
+                                <label>Availability</label>
+                                <div class="availability-days">
+                                    {% for day in photographer.availability %}
+                                        <span class="day-badge">{{ day }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                            
+                            <div class="rate-section">
+                                <span class="rate-label">Rate per Session:</span>
+                                <span class="rate-amount">₹{{ photographer.rate }}</span>
+                            </div>
+
+                            <div class="contact-info">
+                                <p>
+                                    <strong>Contact:</strong> 
+                                    <a href="mailto:{{ photographer.contact }}">
+                                        {{ photographer.contact }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+
+                        <!-- Book Button -->
+                        <div class="photographer-action">
+                            <a href="{{ url_for('book', photographer_id=photographer.id) }}" class="btn btn-primary btn-block">
+                                Book This Photographer
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <!-- No photographers available message -->
+                <div class="no-data">
+                    <p>No photographers available at the moment.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="container" style="margin-top: 30px; text-align: center;">
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">View My Bookings</a>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>&copy; 2026 Photography Booking Platform. All rights reserved.</p>
+    </footer>
+</body>
+</html>

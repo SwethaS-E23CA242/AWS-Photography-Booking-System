@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="My Bookings - Manage your photography session bookings on Capture Moments">
+    <title>My Bookings - Capture Moments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <span class="brand-logo-icon">C</span>
+                <span>Capture Moments</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                <li><a href="{{ url_for('photographers') }}" class="nav-link">Browse</a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link active">My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link btn btn-logout btn-sm">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="container">
+            <h1>My Bookings</h1>
+            <p>View and manage your photography session bookings</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="container">
+            <!-- Booking Statistics -->
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <p class="stat-label">Total Bookings</p>
+                    <p class="stat-value">{{ bookings|length }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Pending</p>
+                    <p class="stat-value">{{ bookings|selectattr('status', 'equalto', 'Pending')|list|length }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Confirmed</p>
+                    <p class="stat-value">{{ bookings|selectattr('status', 'equalto', 'Confirmed')|list|length }}</p>
+                </div>
+            </div>
+
+            <!-- Bookings Section -->
+            {% if bookings %}
+                <section class="bookings-section">
+                    <div class="bookings-header">
+                        <h2>Your Sessions</h2>
+                    </div>
+                    <div style="overflow-x: auto;">
+                        <table class="bookings-table">
+                            <thead>
+                                <tr>
+                                    <th>Photographer</th>
+                                    <th>Date</th>
+                                    <th>Time</th>
+                                    <th>Location</th>
+                                    <th>Status</th>
+                                    <th>Booked</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for booking in bookings %}
+                                    <tr class="booking-row">
+                                        <td>
+                                            <strong>{{ booking.photographer_name }}</strong>
+                                        </td>
+                                        <td>{{ booking.date }}</td>
+                                        <td>{{ booking.time }}</td>
+                                        <td>{{ booking.location }}</td>
+                                        <td>
+                                            <span class="status-badge status-{{ booking.status.lower() }}">
+                                                {{ booking.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ booking.created_at }}</td>
+                                    </tr>
+                                    {% if booking.notes %}
+                                        <tr class="booking-details">
+                                            <td colspan="6">
+                                                <strong>Notes:</strong> {{ booking.notes }}
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            {% else %}
+                <!-- No Bookings State -->
+                <div class="no-data">
+                    <p>You haven't made any bookings yet.</p>
+                    <a href="{{ url_for('photographers') }}" class="btn btn-primary btn-lg">Browse Photographers</a>
+                </div>
+            {% endif %}
+
+            <!-- Call to Action -->
+            <div style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
+                <a href="{{ url_for('photographers') }}" class="btn btn-secondary btn-lg">Book Another Session</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
+        </div>
+    </footer>
+</body>
+</html>

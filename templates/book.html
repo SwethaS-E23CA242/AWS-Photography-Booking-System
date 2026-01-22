@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Book a professional photographer on Capture Moments. Schedule your photography session today.">
+    <title>Book Photographer - Capture Moments</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <span class="brand-logo-icon">C</span>
+                <span>Capture Moments</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
+                <li><a href="{{ url_for('photographers') }}" class="nav-link">Browse</a></li>
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link">My Bookings</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link btn btn-logout btn-sm">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="container">
+            <h1>Book Your Photographer</h1>
+            <p>Complete the details below to schedule your photography session</p>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="content-wrapper">
+        <div class="container">
+            <div class="booking-wrapper">
+                <!-- Photographer Summary -->
+                <aside class="booking-summary">
+                    <div class="booking-summary-header">
+                        <h2>{{ photographer.name }}</h2>
+                        <p class="booking-summary-spec">{{ photographer.specialization }}</p>
+                    </div>
+                    
+                    <div class="booking-summary-details">
+                        <p><strong>About:</strong></p>
+                        <p>{{ photographer.bio }}</p>
+                        
+                        <p style="margin-top: 1rem;"><strong>Experience:</strong></p>
+                        <p>{{ photographer.experience }} years</p>
+                        
+                        <p><strong>Location:</strong></p>
+                        <p>{{ photographer.location }}</p>
+                        
+                        {% if photographer.skills %}
+                        <p style="margin-top: 1rem;"><strong>Skills:</strong></p>
+                        <div class="booking-skills">
+                            {% for skill in photographer.skills %}
+                                <span class="booking-skill">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if photographer.availability %}
+                        <p style="margin-top: 1rem;"><strong>Available:</strong></p>
+                        <div class="booking-availability">
+                            {% for day in photographer.availability %}
+                                <span class="booking-day">{{ day }}</span>
+                            {% endfor %}
+                        </div>
+                        {% endif %}
+                        
+                        <p style="margin-top: 1.5rem;"><strong>Rate:</strong></p>
+                        <p style="font-size: 1.5rem; font-weight: 700; color: #8B7355; margin-bottom: 0;">₹{{ photographer.rate }}/session</p>
+                        
+                        <p style="margin-top: 1rem;"><strong>Contact:</strong></p>
+                        <p><a href="mailto:{{ photographer.contact }}">{{ photographer.contact }}</a></p>
+                    </div>
+                </aside>
+
+                <!-- Booking Form -->
+                <main class="booking-form-container">
+                    <h3>Booking Details</h3>
+
+                    {% if error %}
+                        <div class="alert alert-error">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" action="{{ url_for('book', photographer_id=photographer_id) }}">
+                        <div class="availability-notice">
+                            <p><strong>Available Days:</strong> {{ photographer.availability|join(', ') }}</p>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="booking_date">Session Date</label>
+                            <input 
+                                type="date" 
+                                id="booking_date" 
+                                name="booking_date" 
+                                required
+                            >
+                            <small>Select your preferred date (only available days)</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="booking_time">Session Time</label>
+                            <input 
+                                type="time" 
+                                id="booking_time" 
+                                name="booking_time" 
+                                required
+                            >
+                            <small>Choose your session start time</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="location">Location</label>
+                            <input 
+                                type="text" 
+                                id="location" 
+                                name="location" 
+                                placeholder="Venue address or specific location" 
+                                required
+                            >
+                            <small>Provide the full address where the session will take place</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Additional Notes (Optional)</label>
+                            <textarea 
+                                id="notes" 
+                                name="notes" 
+                                placeholder="Share any special requests, event details, or specific requirements"
+                            ></textarea>
+                            <small>Tell the photographer about your vision, preferences, or special needs</small>
+                        </div>
+
+                        <div class="form-buttons">
+                            <button type="submit" class="btn btn-primary btn-lg">Confirm Booking</button>
+                            <a href="{{ url_for('photographers') }}" class="btn btn-outline btn-lg">Cancel</a>
+                        </div>
+                    </form>
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Available days from photographer
+        const availableDays = {{ photographer.availability|tojson }};
+        
+        // Day names mapping
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        
+        // Date input element
+        const dateInput = document.getElementById('booking_date');
+        
+        // Function to check if a date is available
+        function isDateAvailable(date) {
+            const dayName = dayNames[date.getDay()];
+            return availableDays.includes(dayName);
+        }
+        
+        // Disable unavailable dates in the date picker
+        dateInput.addEventListener('input', function() {
+            // HTML5 date input doesn't have built-in way to disable specific dates,
+            // so we validate on form submission
+        });
+        
+        // Validate on form submission
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const selectedDate = new Date(dateInput.value + 'T00:00:00');
+            
+            if (!isDateAvailable(selectedDate)) {
+                e.preventDefault();
+                alert('The selected date is not available. Please choose from: ' + availableDays.join(', '));
+                return false;
+            }
+        });
+        
+        // Add visual indicator - disable past dates and highlight available days
+        dateInput.addEventListener('change', function() {
+            const selectedDate = new Date(this.value + 'T00:00:00');
+            const dayName = dayNames[selectedDate.getDay()];
+            
+            if (!availableDays.includes(dayName)) {
+                this.style.borderColor = '#EF4444';
+                this.style.backgroundColor = '#FEE2E2';
+            } else {
+                this.style.borderColor = '#D4A574';
+                this.style.backgroundColor = '#FFFBF7';
+            }
+        });
+        
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.setAttribute('min', today);
+    </script>
+</body>
+</html>
