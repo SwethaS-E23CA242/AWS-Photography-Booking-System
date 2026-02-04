@@ -689,7 +689,18 @@ def photographer_dashboard():
     # Fallback to local bookings_db
     all_bookings = []
     for bid, booking in bookings_db.items():
-        if booking.get('photographer_id') == photographer_id:
+        # Convert both to same type for comparison
+        booking_photo_id = booking.get('photographer_id')
+        try:
+            booking_photo_id = int(booking_photo_id)
+        except (ValueError, TypeError):
+            pass
+        try:
+            pid = int(photographer_id)
+        except (ValueError, TypeError):
+            pid = photographer_id
+        
+        if booking_photo_id == pid or booking_photo_id == photographer_id:
             b = booking.copy()
             b['booking_id'] = bid
             all_bookings.append(b)
@@ -774,7 +785,7 @@ def admin_photographers():
     return render_template('admin_photographers.html', photographers=photographers_list)
 
 @app.route('/admin/users')
-def admin_users():
+def admin_view_users():
     if 'username' not in session or session.get('user_type') != 'admin':
         return redirect(url_for('login_admin'))
 
