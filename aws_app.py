@@ -233,7 +233,7 @@ def user_exists(username):
         response = users_table.get_item(Key={'username': username})
         if 'Item' in response:
             return True
-    except ClientError as e:
+    except Exception as e:
         print(f"Error checking user (DynamoDB): {e}")
 
     # Fallback to local in-memory users
@@ -244,7 +244,7 @@ def email_exists(email):
         # DynamoDB scan
         response = users_table.scan(FilterExpression='email = :email', ExpressionAttributeValues={':email': email})
         return len(response.get('Items', [])) > 0
-    except ClientError as e:
+    except Exception as e:
         print(f"Error checking email (DynamoDB): {e}")
 
     # Fallback to local users
@@ -258,7 +258,7 @@ def authenticate_user(username, password):
             if user['password'] == hash_password(password):
                 return username
         return None
-    except ClientError as e:
+    except Exception as e:
         print(f"Error authenticating user (DynamoDB): {e}")
     # Fallback to local users
     for u in users_db.values():
@@ -275,7 +275,7 @@ def get_user_by_username(username):
     try:
         response = users_table.get_item(Key={'username': username})
         return response.get('Item')
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting user (DynamoDB): {e}")
     # Fallback to local users
     for u in users_db.values():
@@ -292,7 +292,7 @@ def get_photographer_by_id(photographer_id):
     try:
         response = photographers_table.get_item(Key={'id': photographer_id})
         return response.get('Item')
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting photographer (DynamoDB): {e}")
     # Fallback to local photographers
     # Try direct key (string), then int conversion
@@ -326,7 +326,7 @@ def get_user_bookings(username):
             booking['photographer_name'] = photographer['name'] if photographer else 'Unknown'
         
         return bookings
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting user bookings (DynamoDB): {e}")
     # Fallback to local bookings (local stores user by user_id or username)
     result = []
@@ -387,7 +387,7 @@ def register():
             
             send_notification("New Customer Registration", f"User {username} has registered.")
             return redirect(url_for('login'))
-        except ClientError as e:
+        except Exception as e:
             print(f"Error registering user (DynamoDB): {e}")
             # Fallback: store user in local in-memory DB
             user_id = get_next_user_id()
@@ -531,7 +531,7 @@ def photographers():
         response = photographers_table.scan()
         photographers_list = response.get('Items', [])
         return render_template('photographers.html', photographers=photographers_list)
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting photographers (DynamoDB): {e}")
     # Fallback to local photographers
     photographers_list = []
@@ -584,7 +584,7 @@ def book(photographer_id):
                     'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
                     'status': 'Pending'
                 })
-            except ClientError as e:
+            except Exception as e:
                 print(f"Error creating booking (DynamoDB): {e}")
                 # Fallback: store booking locally
                 bookings_db[booking_id] = {
@@ -627,7 +627,7 @@ def photographer_dashboard():
         response = bookings_table.scan()
         all_bookings = response.get('Items', [])
         return render_template('photographer_dashboard.html', bookings=all_bookings)
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting photographer dashboard (DynamoDB): {e}")
     # Fallback to local bookings_db
     all_bookings = []
@@ -664,7 +664,7 @@ def admin_dashboard():
         }
 
         return render_template('admin_dashboard.html', stats=stats)
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting admin dashboard (DynamoDB): {e}")
     # Fallback to local in-memory stats
     users = list(users_db.values())
@@ -694,7 +694,7 @@ def admin_photographers():
         response = photographers_table.scan()
         photographers_list = response.get('Items', [])
         return render_template('admin_photographers.html', photographers=photographers_list)
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting photographers (DynamoDB): {e}")
     # Fallback to local photographers
     photographers_list = []
@@ -731,7 +731,7 @@ def admin_add_photographer():
             response = photographer_users_table.get_item(Key={'username': username})
             if 'Item' in response:
                 return render_template('admin_add_photographer.html', error='Username already exists')
-        except ClientError as e:
+        except Exception as e:
             print(f"Error checking photographer username (DynamoDB): {e}")
             if username in photographer_users:
                 return render_template('admin_add_photographer.html', error='Username already exists')
@@ -780,7 +780,7 @@ def admin_add_photographer():
 
             send_notification("New Photographer Added", f"Photographer {name} has been added to the system.")
             return redirect(url_for('admin_photographers'))
-        except ClientError as e:
+        except Exception as e:
             print(f"Error adding photographer to DynamoDB: {e}")
             # Fallback: add locally
             next_photo_id = max(photographers_db.keys()) + 1 if photographers_db else 1
@@ -815,7 +815,7 @@ def admin_delete_photographer(photographer_id):
         photographers_table.delete_item(Key={'id': photographer_id})
         send_notification("Photographer Deleted", f"Photographer {photographer_id} has been removed.")
         return redirect(url_for('admin_photographers'))
-    except ClientError as e:
+    except Exception as e:
         print(f"Error deleting photographer (DynamoDB): {e}")
         # Fallback: attempt to delete from local photographers_db
         try:
