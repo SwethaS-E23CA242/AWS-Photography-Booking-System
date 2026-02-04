@@ -505,7 +505,7 @@ def login_photographer():
 
             photographer = get_photographer_by_id(photographer_info['photographer_id'])
             session['username'] = username
-            session['photographer_id'] = photographer_info['photographer_id']
+            session['photographer_id'] = str(photographer_info['photographer_id'])
             session['photographer_name'] = photographer['name'] if photographer else username
             session['user_type'] = 'photographer'
 
@@ -520,7 +520,7 @@ def login_photographer():
 
             photographer = get_photographer_by_id(photographer_info['photographer_id'])
             session['username'] = username
-            session['photographer_id'] = photographer_info['photographer_id']
+            session['photographer_id'] = str(photographer_info['photographer_id'])
             session['photographer_name'] = photographer['name'] if photographer else username
             session['user_type'] = 'photographer'
 
@@ -689,18 +689,8 @@ def photographer_dashboard():
     # Fallback to local bookings_db
     all_bookings = []
     for bid, booking in bookings_db.items():
-        # Convert both to same type for comparison
-        booking_photo_id = booking.get('photographer_id')
-        try:
-            booking_photo_id = int(booking_photo_id)
-        except (ValueError, TypeError):
-            pass
-        try:
-            pid = int(photographer_id)
-        except (ValueError, TypeError):
-            pid = photographer_id
-        
-        if booking_photo_id == pid or booking_photo_id == photographer_id:
+        # Both photographer_id values are now strings, so direct comparison works
+        if str(booking.get('photographer_id')) == str(photographer_id):
             b = booking.copy()
             b['booking_id'] = bid
             all_bookings.append(b)
