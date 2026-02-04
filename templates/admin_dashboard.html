@@ -50,7 +50,7 @@
                     <div class="stat-card">
                         <div class="stat-icon">📷</div>
                         <div class="stat-content">
-                            <p class="stat-label">Photographer Accounts</p>
+                            <p class="stat-label">Photographer Users</p>
                             <p class="stat-value">{{ stats.photographer_users }}</p>
                         </div>
                     </div>
@@ -70,6 +70,14 @@
                             <p class="stat-value">{{ stats.total_bookings }}</p>
                         </div>
                     </div>
+
+                    <div class="stat-card">
+                        <div class="stat-icon">⏳</div>
+                        <div class="stat-content">
+                            <p class="stat-label">Pending Bookings</p>
+                            <p class="stat-value">{{ stats.pending_bookings }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -77,9 +85,9 @@
                 <h2>Quick Actions</h2>
                 <div class="action-buttons">
                     <a href="{{ url_for('admin_photographers') }}" class="btn btn-primary">Manage Photographers</a>
-                    <button class="btn btn-primary" disabled title="Coming Soon">Manage Users</button>
-                    <button class="btn btn-primary" disabled title="Coming Soon">View Reports</button>
-                    <button class="btn btn-primary" disabled title="Coming Soon">System Settings</button>
+                    <a href="{{ url_for('admin_users') }}" class="btn btn-primary">Manage Users</a>
+                    <a href="{{ url_for('admin_reports') }}" class="btn btn-primary">View Reports</a>
+                    <a href="{{ url_for('admin_settings') }}" class="btn btn-primary">System Settings</a>
                 </div>
             </div>
         </div>

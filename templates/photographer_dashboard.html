@@ -36,9 +36,13 @@
                             <div class="booking-card">
                                 <div class="booking-header">
                                     <h3>Booking #{{ booking.id }}</h3>
-                                    <span class="booking-status" style="background-color: {% if booking.status == 'Pending' %}#f39c12{% elif booking.status == 'Confirmed' %}#27ae60{% else %}#e74c3c{% endif %};">
-                                        {{ booking.status }}
-                                    </span>
+                                    {% if booking.status == 'Pending' %}
+                                        <span class="booking-status status-pending">{{ booking.status }}</span>
+                                    {% elif booking.status == 'Confirmed' %}
+                                        <span class="booking-status status-confirmed">{{ booking.status }}</span>
+                                    {% else %}
+                                        <span class="booking-status status-cancelled">{{ booking.status }}</span>
+                                    {% endif %}
                                 </div>
                                 <div class="booking-details">
                                     <p><strong>Date:</strong> {{ booking.date }}</p>
@@ -99,6 +103,18 @@
             color: white;
             font-size: 0.85rem;
             font-weight: bold;
+        }
+
+        .booking-status.status-pending {
+            background-color: #f39c12;
+        }
+
+        .booking-status.status-confirmed {
+            background-color: #27ae60;
+        }
+
+        .booking-status.status-cancelled {
+            background-color: #e74c3c;
         }
 
         .booking-details p {
