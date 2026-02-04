@@ -635,8 +635,13 @@ def photographer_dashboard():
     if 'username' not in session or session.get('user_type') != 'photographer':
         return redirect(url_for('login'))
 
+    photographer_id = session.get('photographer_id')
+    
     try:
-        response = bookings_table.scan()
+        response = bookings_table.scan(
+            FilterExpression='photographer_id = :pid',
+            ExpressionAttributeValues={':pid': photographer_id}
+        )
         all_bookings = response.get('Items', [])
         return render_template('photographer_dashboard.html', bookings=all_bookings)
     except Exception as e:
@@ -644,9 +649,10 @@ def photographer_dashboard():
     # Fallback to local bookings_db
     all_bookings = []
     for bid, booking in bookings_db.items():
-        b = booking.copy()
-        b['booking_id'] = bid
-        all_bookings.append(b)
+        if booking.get('photographer_id') == photographer_id:
+            b = booking.copy()
+            b['booking_id'] = bid
+            all_bookings.append(b)
     return render_template('photographer_dashboard.html', bookings=all_bookings)
 
 @app.route('/admin-dashboard')
