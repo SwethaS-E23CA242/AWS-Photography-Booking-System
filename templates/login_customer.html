@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Login to Capture Moments - Access your bookings and manage your photography sessions">
-    <title>Login - Capture Moments Photography</title>
+    <meta name="description" content="Customer Login - Access your bookings and manage your photography sessions">
+    <title>Customer Login - Capture Moments Photography</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
@@ -24,9 +24,12 @@
 
     <div class="content-wrapper">
         <div class="auth-container">
-            <form method="POST" action="{{ url_for('login') }}" class="auth-form">
-                <h2>Welcome Back</h2>
-                <p class="auth-form-subtitle">Sign in to your account to continue booking</p>
+            <form method="POST" action="{{ url_for('login_customer') }}" class="auth-form">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 0.5rem; margin-bottom: 1rem;">
+                    <span style="font-size: 2rem;">👤</span>
+                    <h2>Customer Login</h2>
+                </div>
+                <p class="auth-form-subtitle">Sign in to your customer account to browse and book photographers</p>
 
                 {% if error %}
                     <div class="alert alert-error">
@@ -60,6 +63,10 @@
 
                 <p class="auth-link">
                     Don't have an account? <a href="{{ url_for('register') }}">Create one here</a>
+                </p>
+
+                <p class="auth-link" style="font-size: 0.9rem; color: #666;">
+                    Wrong account type? <a href="{{ url_for('login') }}">Choose another login type</a>
                 </p>
             </form>
         </div>

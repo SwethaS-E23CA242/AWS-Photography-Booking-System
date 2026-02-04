@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
@@ -24,7 +24,6 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <header class="page-header">
         <div class="container">
             <h1>Book Your Photographer</h1>
@@ -32,11 +31,10 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="content-wrapper">
         <div class="container">
             <div class="booking-wrapper">
-                <!-- Photographer Summary -->
+                
                 <aside class="booking-summary">
                     <div class="booking-summary-header">
                         <h2>{{ photographer.name }}</h2>
@@ -79,7 +77,6 @@
                     </div>
                 </aside>
 
-                <!-- Booking Form -->
                 <main class="booking-form-container">
                     <h3>Booking Details</h3>
 
@@ -148,7 +145,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container" style="text-align: center;">
             <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>

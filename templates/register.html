@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
@@ -22,7 +22,6 @@
         </div>
     </nav>
 
-    <!-- Registration Form Container -->
     <div class="content-wrapper">
         <div class="auth-container">
             <form method="POST" action="{{ url_for('register') }}" class="auth-form">
@@ -93,7 +92,6 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container" style="text-align: center;">
             <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
