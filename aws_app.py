@@ -291,18 +291,29 @@ def get_user_by_username(username):
 def get_photographer_by_id(photographer_id):
     try:
         response = photographers_table.get_item(Key={'id': photographer_id})
-        return response.get('Item')
+        if 'Item' in response:
+            return response['Item']
     except Exception as e:
         print(f"Error getting photographer (DynamoDB): {e}")
+    
     # Fallback to local photographers
-    # Try direct key (string), then int conversion
-    if photographer_id in photographers_db:
-        return photographers_db[photographer_id]
+    # Try int conversion first
     try:
         pid = int(photographer_id)
-        return photographers_db.get(pid)
-    except Exception:
-        return None
+        if pid in photographers_db:
+            photo = photographers_db[pid].copy()
+            photo['id'] = pid
+            return photo
+    except (ValueError, TypeError):
+        pass
+    
+    # Try direct key (string)
+    if photographer_id in photographers_db:
+        photo = photographers_db[photographer_id].copy()
+        photo['id'] = photographer_id
+        return photo
+    
+    return None
     # Fallback to local photographers
     # Try direct key (string), then int conversion
     if photographer_id in photographers_db:
@@ -530,15 +541,19 @@ def photographers():
     try:
         response = photographers_table.scan()
         photographers_list = response.get('Items', [])
-        return render_template('photographers.html', photographers=photographers_list)
+        if photographers_list:
+            return render_template('photographers.html', photographers=photographers_list)
     except Exception as e:
         print(f"Error getting photographers (DynamoDB): {e}")
-    # Fallback to local photographers
+    
+    # Fallback to local photographers - ensure IDs are included
     photographers_list = []
-    for pid, p in photographers_db.items():
+    for pid, p in sorted(photographers_db.items()):
         p_copy = p.copy()
         p_copy['id'] = pid
         photographers_list.append(p_copy)
+    
+    print(f"DEBUG: Returning {len(photographers_list)} photographers from local DB")
     return render_template('photographers.html', photographers=photographers_list)
 
 @app.route('/book/<photographer_id>', methods=['GET', 'POST'])
@@ -546,65 +561,62 @@ def book(photographer_id):
     if 'username' not in session:
         return redirect(url_for('login'))
 
-    try:
-        photographer = get_photographer_by_id(photographer_id)
-        if not photographer:
-            return redirect(url_for('photographers'))
+    photographer = get_photographer_by_id(photographer_id)
+    if not photographer:
+        print(f"DEBUG: Photographer {photographer_id} not found")
+        return redirect(url_for('photographers'))
 
-        if request.method == 'POST':
-            booking_date = request.form.get('booking_date', '').strip()
-            booking_time = request.form.get('booking_time', '').strip()
-            location = request.form.get('location', '').strip()
-            notes = request.form.get('notes', '').strip()
+    if request.method == 'POST':
+        booking_date = request.form.get('booking_date', '').strip()
+        booking_time = request.form.get('booking_time', '').strip()
+        location = request.form.get('location', '').strip()
+        notes = request.form.get('notes', '').strip()
 
-            if not booking_date or not booking_time or not location:
-                return render_template('book.html', photographer=photographer, 
-                                     photographer_id=photographer_id, 
-                                     error='Date, time, and location are required')
+        if not booking_date or not booking_time or not location:
+            return render_template('book.html', photographer=photographer, 
+                                 photographer_id=photographer_id, 
+                                 error='Date, time, and location are required')
 
-            booking_date_obj = datetime.strptime(booking_date, '%Y-%m-%d')
-            day_name = booking_date_obj.strftime('%A')
-            
-            if day_name not in photographer.get('availability', []):
-                available_days = ', '.join(photographer.get('availability', []))
-                return render_template('book.html', photographer=photographer, 
-                                     photographer_id=photographer_id, 
-                                     error=f'Photographer is not available on {day_name}. Available days: {available_days}')
+        booking_date_obj = datetime.strptime(booking_date, '%Y-%m-%d')
+        day_name = booking_date_obj.strftime('%A')
+        
+        if day_name not in photographer.get('availability', []):
+            available_days = ', '.join(photographer.get('availability', []))
+            return render_template('book.html', photographer=photographer, 
+                                 photographer_id=photographer_id, 
+                                 error=f'Photographer is not available on {day_name}. Available days: {available_days}')
 
-            booking_id = str(uuid.uuid4())
-            try:
-                bookings_table.put_item(Item={
-                    'booking_id': booking_id,
-                    'username': session['username'],
-                    'photographer_id': photographer_id,
-                    'date': booking_date,
-                    'time': booking_time,
-                    'location': location,
-                    'notes': notes,
-                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'status': 'Pending'
-                })
-            except Exception as e:
-                print(f"Error creating booking (DynamoDB): {e}")
-                # Fallback: store booking locally
-                bookings_db[booking_id] = {
-                    'username': session.get('username'),
-                    'photographer_id': photographer_id,
-                    'date': booking_date,
-                    'time': booking_time,
-                    'location': location,
-                    'notes': notes,
-                    'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                    'status': 'Pending'
-                }
+        booking_id = str(uuid.uuid4())
+        try:
+            bookings_table.put_item(Item={
+                'booking_id': booking_id,
+                'username': session['username'],
+                'photographer_id': photographer_id,
+                'date': booking_date,
+                'time': booking_time,
+                'location': location,
+                'notes': notes,
+                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'status': 'Pending'
+            })
+        except Exception as e:
+            print(f"Error creating booking (DynamoDB): {e}")
+            # Fallback: store booking locally
+            bookings_db[booking_id] = {
+                'username': session.get('username'),
+                'photographer_id': photographer_id,
+                'date': booking_date,
+                'time': booking_time,
+                'location': location,
+                'notes': notes,
+                'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+                'status': 'Pending'
+            }
 
-            send_notification("New Booking", f"Booking {booking_id} created for photographer {photographer['name']}")
-            return redirect(url_for('dashboard'))
+        send_notification("New Booking", f"Booking {booking_id} created for photographer {photographer['name']}")
+        return redirect(url_for('dashboard'))
 
-        return render_template('book.html', photographer=photographer, photographer_id=photographer_id)
-    except ClientError as e:
-        print(f"Error during booking: {e}")
-        return render_template('book.html', photographer={}, photographer_id=photographer_id, error='Booking failed. Please try again.')
+    return render_template('book.html', photographer=photographer, photographer_id=photographer_id)
 
 @app.route('/dashboard')
 def dashboard():
@@ -614,7 +626,7 @@ def dashboard():
     try:
         bookings = get_user_bookings(session['username'])
         return render_template('dashboard.html', bookings=bookings)
-    except ClientError as e:
+    except Exception as e:
         print(f"Error getting dashboard: {e}")
         return render_template('dashboard.html', bookings=[], error='Failed to load dashboard')
 
