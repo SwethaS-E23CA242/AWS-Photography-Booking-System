@@ -225,6 +225,7 @@ photographer_users = {
         'password': hash_password('sarah123'),
         'photographer_id': 2,
         'user_type': 'photographer'
+<<<<<<< HEAD
     },
     'mike_davis': {
         'password': hash_password('mike123'),
@@ -265,6 +266,8 @@ photographer_users = {
         'password': hash_password('lauren123'),
         'photographer_id': 10,
         'user_type': 'photographer'
+=======
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
     }
 }
 
@@ -733,23 +736,34 @@ def admin_dashboard():
     # Fallback to local in-memory stats
     users = list(users_db.values())
     photographers = list(photographers_db.values())
+<<<<<<< HEAD
     photographer_users_list = list(photographer_users.values())
+=======
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
     bookings = list(bookings_db.values())
 
     total_users = len(users)
     customer_users = sum(1 for u in users if u.get('user_type') == 'customer')
     total_photographers = len(photographers)
+<<<<<<< HEAD
     photographer_user_count = len(photographer_users_list)
     total_bookings = len(bookings)
     pending_bookings = sum(1 for b in bookings if b.get('status') == 'Pending')
+=======
+    total_bookings = len(bookings)
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
 
     stats = {
         'total_users': total_users,
         'customer_users': customer_users,
         'total_photographers': total_photographers,
+<<<<<<< HEAD
         'photographer_users': photographer_user_count,
         'total_bookings': total_bookings,
         'pending_bookings': pending_bookings
+=======
+        'total_bookings': total_bookings
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
     }
 
     return render_template('admin_dashboard.html', stats=stats)
@@ -772,6 +786,7 @@ def admin_photographers():
         p_copy['id'] = pid
         photographers_list.append(p_copy)
     return render_template('admin_photographers.html', photographers=photographers_list)
+<<<<<<< HEAD
 
 @app.route('/admin/users')
 def admin_users():
@@ -829,6 +844,8 @@ def admin_settings():
     return render_template('admin_settings.html')
 
 @app.route('/admin/photographers')
+=======
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
 
 @app.route('/admin/photographer/add', methods=['GET', 'POST'])
 def admin_add_photographer():
@@ -967,4 +984,8 @@ if __name__ == '__main__':
         host='0.0.0.0',
         port=5000,
         debug=True
+<<<<<<< HEAD
     )
+=======
+    )
+>>>>>>> 230cb09b4f97e515c1fc224d9e2d06a51f78ea6d
