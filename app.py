@@ -2,19 +2,11 @@ from flask import Flask, render_template, request, redirect, url_for, session
 from datetime import datetime
 import hashlib
 
-# Initialize Flask application
 app = Flask(__name__)
-app.secret_key = 'your-secret-key-change-in-production'  # Change in production
+app.secret_key = 'your-secret-key-change-in-production'
 
-# ============================================================================
-# LOCAL DATA STORAGE (In-Memory Dictionaries and Lists)
-# These will be replaced with DynamoDB in future milestones
-# ============================================================================
-
-# Users storage: {user_id: {username, email, password, created_at}}
 users_db = {}
 
-# Photographers storage: {photographer_id: {name, specialization, rate, contact, bio}}
 photographers_db = {
     1: {
         'name': 'John Smith',
@@ -138,214 +130,243 @@ photographers_db = {
     }
 }
 
-# Bookings storage: {booking_id: {user_id, photographer_id, date, time, location, notes}}
 bookings_db = {}
 
-# Helper counter for unique IDs (In production, use database auto-increment)
 next_user_id = 1
 next_booking_id = 1
 
-
-# ============================================================================
-# UTILITY FUNCTIONS
-# ============================================================================
-
 def hash_password(password):
-    """
-    Hash password using SHA256 for basic security.
-    Note: In production, use bcrypt or argon2
-    """
     return hashlib.sha256(password.encode()).hexdigest()
 
+admin_users = {
+    'admin': {
+        'password': hash_password('admin123'),
+        'user_type': 'admin'
+    }
+}
+
+photographer_users = {
+    'john_smith': {
+        'password': hash_password('john123'),
+        'photographer_id': 1,
+        'user_type': 'photographer'
+    },
+    'sarah_johnson': {
+        'password': hash_password('sarah123'),
+        'photographer_id': 2,
+        'user_type': 'photographer'
+    },
+    'mike_davis': {
+        'password': hash_password('mike123'),
+        'photographer_id': 3,
+        'user_type': 'photographer'
+    },
+    'emily_rodriguez': {
+        'password': hash_password('emily123'),
+        'photographer_id': 4,
+        'user_type': 'photographer'
+    },
+    'david_chen': {
+        'password': hash_password('david123'),
+        'photographer_id': 5,
+        'user_type': 'photographer'
+    },
+    'jessica_williams': {
+        'password': hash_password('jessica123'),
+        'photographer_id': 6,
+        'user_type': 'photographer'
+    },
+    'robert_thompson': {
+        'password': hash_password('robert123'),
+        'photographer_id': 7,
+        'user_type': 'photographer'
+    },
+    'amanda_foster': {
+        'password': hash_password('amanda123'),
+        'photographer_id': 8,
+        'user_type': 'photographer'
+    },
+    'chris_martinez': {
+        'password': hash_password('chris123'),
+        'photographer_id': 9,
+        'user_type': 'photographer'
+    },
+    'lauren_mitchell': {
+        'password': hash_password('lauren123'),
+        'photographer_id': 10,
+        'user_type': 'photographer'
+    }
+}
 
 def get_next_user_id():
-    """Get next available user ID (simulating auto-increment)"""
     global next_user_id
     user_id = next_user_id
     next_user_id += 1
     return user_id
 
-
 def get_next_booking_id():
-    """Get next available booking ID (simulating auto-increment)"""
     global next_booking_id
     booking_id = next_booking_id
     next_booking_id += 1
     return booking_id
 
-
 def user_exists(username):
-    """Check if username already exists in the system"""
     return any(user['username'] == username for user in users_db.values())
 
-
 def email_exists(email):
-    """Check if email already exists in the system"""
     return any(user['email'] == email for user in users_db.values())
 
-
 def authenticate_user(username, password):
-    """
-    Authenticate user with username and password.
-    Returns user_id if authentication successful, None otherwise
-    """
     hashed_password = hash_password(password)
     for user_id, user in users_db.items():
         if user['username'] == username and user['password'] == hashed_password:
             return user_id
     return None
 
-
 def get_user_by_id(user_id):
-    """Retrieve user information by user ID"""
     return users_db.get(user_id)
 
-
 def get_photographer_by_id(photographer_id):
-    """Retrieve photographer information by ID"""
     return photographers_db.get(photographer_id)
 
-
 def get_user_bookings(user_id):
-    """Get all bookings for a specific user"""
     user_bookings = []
     for booking_id, booking in bookings_db.items():
         if booking['user_id'] == user_id:
-            # Enrich booking with photographer information
             photographer = get_photographer_by_id(booking['photographer_id'])
             booking['id'] = booking_id
             booking['photographer_name'] = photographer['name'] if photographer else 'Unknown'
             user_bookings.append(booking)
     return user_bookings
 
-
-# ============================================================================
-# ROUTE: HOME PAGE
-# ============================================================================
-
 @app.route('/')
 def index():
-    """
-    Home page route - displays welcome message and navigation options
-    """
     return render_template('index.html')
-
-
-# ============================================================================
-# ROUTE: USER REGISTRATION
-# ============================================================================
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
-    """
-    User registration route
-    GET: Display registration form
-    POST: Process registration form submission
-    """
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         email = request.form.get('email', '').strip()
         password = request.form.get('password', '')
         confirm_password = request.form.get('confirm_password', '')
 
-        # Validation: Check for empty fields
         if not username or not email or not password or not confirm_password:
             return render_template('register.html', error='All fields are required')
 
-        # Validation: Check if username already exists
         if user_exists(username):
             return render_template('register.html', error='Username already exists')
 
-        # Validation: Check if email already exists
         if email_exists(email):
             return render_template('register.html', error='Email already registered')
 
-        # Validation: Check if passwords match
         if password != confirm_password:
             return render_template('register.html', error='Passwords do not match')
 
-        # Validation: Check password length
         if len(password) < 6:
             return render_template('register.html', error='Password must be at least 6 characters')
 
-        # Create new user
         user_id = get_next_user_id()
         users_db[user_id] = {
             'username': username,
             'email': email,
             'password': hash_password(password),
+            'user_type': 'customer',
             'created_at': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         }
 
-        # Redirect to login page
         return redirect(url_for('login'))
 
     return render_template('register.html')
 
-
-# ============================================================================
-# ROUTE: USER LOGIN
-# ============================================================================
-
-@app.route('/login', methods=['GET', 'POST'])
+@app.route('/login')
 def login():
-    """
-    User login route
-    GET: Display login form
-    POST: Process login form submission
-    """
+    return render_template('login_select.html')
+
+@app.route('/login/customer', methods=['GET', 'POST'])
+def login_customer():
     if request.method == 'POST':
         username = request.form.get('username', '').strip()
         password = request.form.get('password', '')
 
-        # Validation: Check for empty fields
         if not username or not password:
-            return render_template('login.html', error='Username and password required')
+            return render_template('login_customer.html', error='Username and password required')
 
-        # Authenticate user
         user_id = authenticate_user(username, password)
 
         if user_id is None:
-            return render_template('login.html', error='Invalid username or password')
+            return render_template('login_customer.html', error='Invalid username or password')
 
-        # Store user information in session
+        user = get_user_by_id(user_id)
+        if user['user_type'] != 'customer':
+            return render_template('login_customer.html', error='Please use the appropriate login portal for your account type')
+
         session['user_id'] = user_id
         session['username'] = username
+        session['user_type'] = 'customer'
 
-        # Redirect to photographers page
         return redirect(url_for('photographers'))
 
-    return render_template('login.html')
+    return render_template('login_customer.html')
 
+@app.route('/login/photographer', methods=['GET', 'POST'])
+def login_photographer():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
 
-# ============================================================================
-# ROUTE: LOGOUT
-# ============================================================================
+        if not username or not password:
+            return render_template('login_photographer.html', error='Username and password required')
+
+        hashed_password = hash_password(password)
+        if username not in photographer_users or photographer_users[username]['password'] != hashed_password:
+            return render_template('login_photographer.html', error='Invalid username or password')
+
+        photographer_info = photographer_users[username]
+        photographer_id = photographer_info['photographer_id']
+        photographer = get_photographer_by_id(photographer_id)
+
+        session['user_id'] = username
+        session['username'] = username
+        session['photographer_id'] = photographer_id
+        session['photographer_name'] = photographer['name'] if photographer else username
+        session['user_type'] = 'photographer'
+
+        return redirect(url_for('photographer_dashboard'))
+
+    return render_template('login_photographer.html')
+
+@app.route('/login/admin', methods=['GET', 'POST'])
+def login_admin():
+    if request.method == 'POST':
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+
+        if not username or not password:
+            return render_template('login_admin.html', error='Username and password required')
+
+        hashed_password = hash_password(password)
+        if username not in admin_users or admin_users[username]['password'] != hashed_password:
+            return render_template('login_admin.html', error='Invalid username or password')
+
+        session['user_id'] = username
+        session['username'] = username
+        session['user_type'] = 'admin'
+
+        return redirect(url_for('admin_dashboard'))
+
+    return render_template('login_admin.html')
 
 @app.route('/logout')
 def logout():
-    """
-    User logout route - clears session and redirects to home page
-    """
     session.clear()
     return redirect(url_for('index'))
 
-
-# ============================================================================
-# ROUTE: PHOTOGRAPHERS LISTING
-# ============================================================================
-
 @app.route('/photographers')
 def photographers():
-    """
-    Display list of all available photographers
-    Requires user to be logged in
-    """
-    # Check if user is logged in
-    if 'user_id' not in session:
+    if 'user_id' not in session or session.get('user_type') != 'customer':
         return redirect(url_for('login'))
 
-    # Convert photographers_db to a list with IDs included
     photographers_list = []
     for photo_id, photo_info in photographers_db.items():
         photographer = photo_info.copy()
@@ -354,23 +375,11 @@ def photographers():
 
     return render_template('photographers.html', photographers=photographers_list)
 
-
-# ============================================================================
-# ROUTE: BOOKING FORM
-# ============================================================================
-
 @app.route('/book/<int:photographer_id>', methods=['GET', 'POST'])
 def book(photographer_id):
-    """
-    Booking form route for a specific photographer
-    GET: Display booking form
-    POST: Process booking form submission
-    """
-    # Check if user is logged in
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
-    # Check if photographer exists
     photographer = get_photographer_by_id(photographer_id)
     if not photographer:
         return redirect(url_for('photographers'))
@@ -381,15 +390,13 @@ def book(photographer_id):
         location = request.form.get('location', '').strip()
         notes = request.form.get('notes', '').strip()
 
-        # Validation: Check for required fields
         if not booking_date or not booking_time or not location:
             return render_template('book.html', photographer=photographer, 
                                  photographer_id=photographer_id, 
                                  error='Date, time, and location are required')
 
-        # Validation: Check if booking date is on an available day
         booking_date_obj = datetime.strptime(booking_date, '%Y-%m-%d')
-        day_name = booking_date_obj.strftime('%A')  # Get day name (e.g., 'Monday')
+        day_name = booking_date_obj.strftime('%A')
         
         if day_name not in photographer.get('availability', []):
             available_days = ', '.join(photographer.get('availability', []))
@@ -397,9 +404,10 @@ def book(photographer_id):
                                  photographer_id=photographer_id, 
                                  error=f'Photographer is not available on {day_name}. Available days: {available_days}')
 
-        # Create new booking
         booking_id = get_next_booking_id()
         bookings_db[booking_id] = {
+            'id': booking_id,
+            'booking_number': booking_id,
             'user_id': session['user_id'],
             'photographer_id': photographer_id,
             'date': booking_date,
@@ -410,22 +418,12 @@ def book(photographer_id):
             'status': 'Pending'
         }
 
-        # Redirect to dashboard
         return redirect(url_for('dashboard'))
 
     return render_template('book.html', photographer=photographer, photographer_id=photographer_id)
 
-
-# ============================================================================
-# ROUTE: USER DASHBOARD
-# ============================================================================
-
 @app.route('/dashboard')
 def dashboard():
-    """
-    User dashboard displaying all bookings made by the logged-in user
-    """
-    # Check if user is logged in
     if 'user_id' not in session:
         return redirect(url_for('login'))
 
@@ -434,30 +432,273 @@ def dashboard():
 
     return render_template('dashboard.html', bookings=bookings)
 
+@app.route('/photographer-dashboard')
+def photographer_dashboard():
+    if 'user_id' not in session or session.get('user_type') != 'photographer':
+        return redirect(url_for('login'))
 
-# ============================================================================
-# ERROR HANDLERS
-# ============================================================================
+    all_bookings = []
+    current_photographer_id = session.get('photographer_id')
+    for booking_id, booking in bookings_db.items():
+        if booking.get('photographer_id') != current_photographer_id:
+            continue
+        booking_copy = booking.copy()
+        # ensure an `id` field is present for template use
+        booking_copy['id'] = booking_id
+        all_bookings.append(booking_copy)
+
+    return render_template('photographer_dashboard.html', bookings=all_bookings)
+
+@app.route('/admin-dashboard')
+def admin_dashboard():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    total_users = len(users_db)
+    total_photographers = len(photographers_db)
+    total_bookings = len(bookings_db)
+    customer_users = sum(1 for u in users_db.values() if u['user_type'] == 'customer')
+    photographer_users = sum(1 for u in users_db.values() if u['user_type'] == 'photographer')
+
+    stats = {
+        'total_users': total_users,
+        'customer_users': customer_users,
+        'photographer_users': photographer_users,
+        'total_photographers': total_photographers,
+        'total_bookings': total_bookings
+    }
+
+    return render_template('admin_dashboard.html', stats=stats)
+
+@app.route('/admin/photographers')
+def admin_photographers():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    photographers_list = []
+    for photo_id, photo_info in photographers_db.items():
+        photographer = photo_info.copy()
+        photographer['id'] = photo_id
+        photographers_list.append(photographer)
+
+    return render_template('admin_photographers.html', photographers=photographers_list)
+
+
+@app.route('/admin/manage-users')
+def admin_manage_users():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    users_list = []
+    for uid, user in users_db.items():
+        u = user.copy()
+        u['id'] = uid
+        users_list.append(u)
+
+    return render_template('admin_users.html', users=users_list)
+
+
+@app.route('/admin/reports')
+def admin_reports():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    total_users = len(users_db)
+    total_bookings = len(bookings_db)
+    photographer_users_count = sum(1 for u in users_db.values() if u.get('user_type') == 'photographer')
+
+    stats = {
+        'total_users': total_users,
+        'total_bookings': total_bookings,
+        'photographer_users': photographer_users_count
+    }
+
+    return render_template('admin_reports.html', stats=stats)
+
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+def admin_settings():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    # minimal settings persistence in-memory (for demo)
+    if request.method == 'POST':
+        site_title = request.form.get('site_title', '').strip()
+        # store in a simple global (not persistent)
+        app.config['SITE_TITLE'] = site_title
+
+    site_title = app.config.get('SITE_TITLE', 'Perfect Portraits Studio')
+    return render_template('admin_settings.html', site_title=site_title)
+
+@app.route('/admin/photographer/add', methods=['GET', 'POST'])
+def admin_add_photographer():
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        specialization = request.form.get('specialization', '').strip()
+        rate = request.form.get('rate', '').strip()
+        contact = request.form.get('contact', '').strip()
+        bio = request.form.get('bio', '').strip()
+        experience = request.form.get('experience', '').strip()
+        location = request.form.get('location', '').strip()
+        image = request.form.get('image', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        skills = request.form.get('skills', '').strip()
+        availability = request.form.getlist('availability')
+
+        if not all([name, specialization, rate, contact, bio, experience, location, username, password]):
+            return render_template('admin_add_photographer.html', error='All fields except image are required')
+
+        if username in photographer_users:
+            return render_template('admin_add_photographer.html', error='Username already exists')
+
+        try:
+            rate = int(rate)
+            experience = int(experience)
+        except ValueError:
+            return render_template('admin_add_photographer.html', error='Rate and experience must be numbers')
+
+        if len(password) < 6:
+            return render_template('admin_add_photographer.html', error='Password must be at least 6 characters')
+
+        next_photo_id = max(photographers_db.keys()) + 1 if photographers_db else 1
+
+        photographers_db[next_photo_id] = {
+            'name': name,
+            'specialization': specialization,
+            'rate': rate,
+            'contact': contact,
+            'bio': bio,
+            'image': image or 'https://via.placeholder.com/400x400?text=' + name.replace(' ', '+'),
+            'experience': experience,
+            'location': location,
+            'skills': [s.strip() for s in skills.split(',')] if skills else [],
+            'availability': availability if availability else ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday']
+        }
+
+        photographer_users[username] = {
+            'password': hash_password(password),
+            'photographer_id': next_photo_id,
+            'user_type': 'photographer'
+        }
+
+        return redirect(url_for('admin_photographers'))
+
+    return render_template('admin_add_photographer.html')
+
+@app.route('/admin/photographer/<int:photographer_id>/delete', methods=['POST'])
+def admin_delete_photographer(photographer_id):
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    if photographer_id in photographers_db:
+        del photographers_db[photographer_id]
+
+    return redirect(url_for('admin_photographers'))
+
+
+@app.route('/admin/photographer/<int:photographer_id>/edit', methods=['GET', 'POST'])
+def admin_edit_photographer(photographer_id):
+    if 'user_id' not in session or session.get('user_type') != 'admin':
+        return redirect(url_for('login_admin'))
+
+    photographer = photographers_db.get(photographer_id)
+    if not photographer:
+        return redirect(url_for('admin_photographers'))
+
+    # create a copy with an `id` key for template attribute access
+    photographer_for_template = photographer.copy()
+    photographer_for_template['id'] = photographer_id
+
+    # find current username/password hash for this photographer, if any
+    current_username = None
+    current_password_hash = None
+    for uname, info in list(photographer_users.items()):
+        if info.get('photographer_id') == photographer_id:
+            current_username = uname
+            current_password_hash = info.get('password')
+            break
+
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        specialization = request.form.get('specialization', '').strip()
+        rate = request.form.get('rate', '').strip()
+        contact = request.form.get('contact', '').strip()
+        bio = request.form.get('bio', '').strip()
+        experience = request.form.get('experience', '').strip()
+        location = request.form.get('location', '').strip()
+        image = request.form.get('image', '').strip()
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '').strip()
+        skills = request.form.get('skills', '').strip()
+        availability = request.form.getlist('availability')
+
+        if not all([name, specialization, rate, contact, bio, experience, location, username]):
+            return render_template('admin_add_photographer.html', error='All fields except image and password are required', editing=True, photographer=photographer_for_template, current_username=current_username)
+
+        try:
+            rate = int(rate)
+            experience = int(experience)
+        except ValueError:
+                return render_template('admin_add_photographer.html', error='Rate and experience must be numbers', editing=True, photographer=photographer_for_template, current_username=current_username)
+
+        # if username changed and new username exists, error
+        if username != current_username and username in photographer_users:
+            return render_template('admin_add_photographer.html', error='Username already exists', editing=True, photographer=photographer_for_template, current_username=current_username)
+
+        # update photographer record
+        photographers_db[photographer_id] = {
+            'name': name,
+            'specialization': specialization,
+            'rate': rate,
+            'contact': contact,
+            'bio': bio,
+            'image': image or photographer.get('image', 'https://via.placeholder.com/400x400?text=' + name.replace(' ', '+')),
+            'experience': experience,
+            'location': location,
+            'skills': [s.strip() for s in skills.split(',')] if skills else [],
+            'availability': availability if availability else photographer.get('availability', ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'])
+        }
+
+        # handle username mapping
+        if current_username and current_username != username:
+            # remove old mapping
+            photographer_users.pop(current_username, None)
+
+        # set password/hash
+        if password:
+            if len(password) < 6:
+                return render_template('admin_add_photographer.html', error='Password must be at least 6 characters', editing=True, photographer=photographer_for_template, current_username=current_username)
+            photographer_users[username] = {
+                'password': hash_password(password),
+                'photographer_id': photographer_id,
+                'user_type': 'photographer'
+            }
+        else:
+            # preserve existing hash if available
+            photographer_users[username] = {
+                'password': current_password_hash or hash_password('changeme'),
+                'photographer_id': photographer_id,
+                'user_type': 'photographer'
+            }
+
+        return redirect(url_for('admin_photographers'))
+
+    # GET
+    return render_template('admin_add_photographer.html', editing=True, photographer=photographer_for_template, current_username=current_username)
 
 @app.errorhandler(404)
 def page_not_found(error):
-    """Handle 404 - Page Not Found errors"""
     return render_template('404.html'), 404
-
 
 @app.errorhandler(500)
 def server_error(error):
-    """Handle 500 - Server errors"""
     return render_template('500.html'), 500
 
-
-# ============================================================================
-# APPLICATION ENTRY POINT
-# ============================================================================
-
 if __name__ == '__main__':
-    # Run Flask development server
-    # Set debug=True for development, change to False in production
     app.run(
         host='localhost',
         port=5000,

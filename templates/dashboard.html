@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="My Bookings - Manage your photography session bookings on Capture Moments">
-    <title>My Bookings - Capture Moments</title>
+    <meta name="description" content="My Bookings - Manage your photography session bookings on Perfect Portraits Studio">
+    <title>My Bookings - Perfect Portraits Studio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
                 <span class="brand-logo-icon">C</span>
-                <span>Capture Moments</span>
+                <span>Perfect Portraits Studio</span>
             </a>
             <ul class="navbar-menu">
                 <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
@@ -24,7 +24,6 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <header class="page-header">
         <div class="container">
             <h1>My Bookings</h1>
@@ -32,10 +31,9 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="content-wrapper">
         <div class="container">
-            <!-- Booking Statistics -->
+            
             <div class="dashboard-grid">
                 <div class="stat-card">
                     <p class="stat-label">Total Bookings</p>
@@ -51,7 +49,6 @@
                 </div>
             </div>
 
-            <!-- Bookings Section -->
             {% if bookings %}
                 <section class="bookings-section">
                     <div class="bookings-header">
@@ -98,24 +95,22 @@
                     </div>
                 </section>
             {% else %}
-                <!-- No Bookings State -->
+                
                 <div class="no-data">
                     <p>You haven't made any bookings yet.</p>
                     <a href="{{ url_for('photographers') }}" class="btn btn-primary btn-lg">Browse Photographers</a>
                 </div>
             {% endif %}
 
-            <!-- Call to Action -->
             <div style="text-align: center; margin-top: 2rem; margin-bottom: 2rem;">
                 <a href="{{ url_for('photographers') }}" class="btn btn-secondary btn-lg">Book Another Session</a>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container" style="text-align: center;">
-            <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
+            <p>&copy; 2026 Perfect Portraits Studio. All rights reserved.</p>
         </div>
     </footer>
 </body>

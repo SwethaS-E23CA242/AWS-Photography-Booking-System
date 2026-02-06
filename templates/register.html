@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Register for Capture Moments - Create your account to start booking professional photographers">
-    <title>Register - Capture Moments Photography</title>
+    <meta name="description" content="Register for Perfect Portraits Studio - Create your account to start booking professional photographers">
+    <title>Register - Perfect Portraits Studio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
                 <span class="brand-logo-icon">C</span>
-                <span>Capture Moments</span>
+                <span>Perfect Portraits Studio</span>
             </a>
             <ul class="navbar-menu">
                 <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
@@ -22,12 +22,11 @@
         </div>
     </nav>
 
-    <!-- Registration Form Container -->
     <div class="content-wrapper">
         <div class="auth-container">
             <form method="POST" action="{{ url_for('register') }}" class="auth-form">
                 <h2>Create Your Account</h2>
-                <p class="auth-form-subtitle">Join Capture Moments to book professional photographers</p>
+                <p class="auth-form-subtitle">Join Perfect Portraits Studio to book professional photographers</p>
 
                 {% if error %}
                     <div class="alert alert-error">
@@ -93,10 +92,9 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container" style="text-align: center;">
-            <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
+            <p>&copy; 2026 Perfect Portraits Studio. All rights reserved.</p>
         </div>
     </footer>
 </body>

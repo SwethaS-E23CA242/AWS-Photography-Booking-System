@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Reports</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">Perfect Portraits Studio</a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('admin_dashboard') }}">Dashboard</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <h1>Reports</h1>
+            <p>Basic system reports and statistics.</p>
+            <div style="display:grid;gap:1rem;max-width:800px;">
+                <div class="stat-card">
+                    <p class="stat-label">Total Users</p>
+                    <p class="stat-value">{{ stats.total_users }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Total Bookings</p>
+                    <p class="stat-value">{{ stats.total_bookings }}</p>
+                </div>
+                <div class="stat-card">
+                    <p class="stat-label">Photographer Accounts</p>
+                    <p class="stat-value">{{ stats.photographer_users }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <div class="navbar-brand">
@@ -22,7 +22,6 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <div class="page-header">
         <div class="container">
             <h1>Our Professional Photographers</h1>
@@ -30,12 +29,11 @@
         </div>
     </div>
 
-    <!-- Photographers Grid -->
     <div class="container">
         <div class="photographers-grid">
             {% if photographers %}
                 {% for photographer in photographers %}
-                    <!-- Photographer Card -->
+                    
                     <div class="photographer-card">
                         <div class="photographer-header">
                             {% if photographer.image %}
@@ -101,7 +99,6 @@
                             </div>
                         </div>
 
-                        <!-- Book Button -->
                         <div class="photographer-action">
                             <a href="{{ url_for('book', photographer_id=photographer.id) }}" class="btn btn-primary btn-block">
                                 Book This Photographer
@@ -110,7 +107,7 @@
                     </div>
                 {% endfor %}
             {% else %}
-                <!-- No photographers available message -->
+                
                 <div class="no-data">
                     <p>No photographers available at the moment.</p>
                 </div>
@@ -118,12 +115,10 @@
         </div>
     </div>
 
-    <!-- Back to Dashboard -->
     <div class="container" style="margin-top: 30px; text-align: center;">
         <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">View My Bookings</a>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <p>&copy; 2026 Photography Booking Platform. All rights reserved.</p>
     </footer>

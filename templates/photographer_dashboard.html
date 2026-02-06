@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Photographer Dashboard - Manage your bookings">
+    <title>Photographer Dashboard - Perfect Portraits Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <span class="brand-logo-icon">C</span>
+                <span>Perfect Portraits Studio</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('photographer_dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <h1>Photographer Dashboard</h1>
+            <p class="subtitle">Welcome, {{ session.username }}! 📷</p>
+
+            <div style="margin-top: 2rem;">
+                <h2>Your Bookings</h2>
+
+                {% if bookings %}
+                    <div class="bookings-list">
+                        {% for booking in bookings %}
+                            <div class="booking-card">
+                                <div class="booking-header">
+                                    <h3>Booking #{{ booking.id }}</h3>
+                                    <span class="booking-status" style="background-color: {% if booking.status == 'Pending' %}#f39c12{% elif booking.status == 'Confirmed' %}#27ae60{% else %}#e74c3c{% endif %};">
+                                        {{ booking.status }}
+                                    </span>
+                                </div>
+                                <div class="booking-details">
+                                    <p><strong>Date:</strong> {{ booking.date }}</p>
+                                    <p><strong>Time:</strong> {{ booking.time }}</p>
+                                    <p><strong>Location:</strong> {{ booking.location }}</p>
+                                    {% if booking.notes %}
+                                        <p><strong>Notes:</strong> {{ booking.notes }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="alert alert-info">
+                        <p>No bookings yet. Your bookings will appear here when customers book your services.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Perfect Portraits Studio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        .bookings-list {
+            display: grid;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .booking-card {
+            background: white;
+            border-left: 4px solid #3498db;
+            padding: 1.5rem;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .booking-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .booking-header h3 {
+            margin: 0;
+            color: #333;
+        }
+
+        .booking-status {
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            color: white;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+
+        .booking-details p {
+            margin: 0.5rem 0;
+            color: #555;
+        }
+
+        .alert-info {
+            background-color: #e8f4f8;
+            border-left: 4px solid #3498db;
+            padding: 1rem;
+            border-radius: 4px;
+            color: #2c3e50;
+        }
+    </style>
+</body>
+</html>

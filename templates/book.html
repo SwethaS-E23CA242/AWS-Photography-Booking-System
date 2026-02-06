@@ -3,17 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Book a professional photographer on Capture Moments. Schedule your photography session today.">
-    <title>Book Photographer - Capture Moments</title>
+    <meta name="description" content="Book a professional photographer on Perfect Portraits Studio. Schedule your photography session today.">
+    <title>Book Photographer - Perfect Portraits Studio</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
-    <!-- Navigation Bar -->
+    
     <nav class="navbar">
         <div class="navbar-container">
             <a href="{{ url_for('index') }}" class="brand-logo">
                 <span class="brand-logo-icon">C</span>
-                <span>Capture Moments</span>
+                <span>Perfect Portraits Studio</span>
             </a>
             <ul class="navbar-menu">
                 <li><a href="{{ url_for('index') }}" class="nav-link">Home</a></li>
@@ -24,7 +24,6 @@
         </div>
     </nav>
 
-    <!-- Page Header -->
     <header class="page-header">
         <div class="container">
             <h1>Book Your Photographer</h1>
@@ -32,11 +31,10 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="content-wrapper">
         <div class="container">
             <div class="booking-wrapper">
-                <!-- Photographer Summary -->
+                
                 <aside class="booking-summary">
                     <div class="booking-summary-header">
                         <h2>{{ photographer.name }}</h2>
@@ -79,7 +77,6 @@
                     </div>
                 </aside>
 
-                <!-- Booking Form -->
                 <main class="booking-form-container">
                     <h3>Booking Details</h3>
 
@@ -148,10 +145,9 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="footer">
         <div class="container" style="text-align: center;">
-            <p>&copy; 2026 Capture Moments Photography. All rights reserved.</p>
+            <p>&copy; 2026 Perfect Portraits Studio. All rights reserved.</p>
         </div>
     </footer>
 

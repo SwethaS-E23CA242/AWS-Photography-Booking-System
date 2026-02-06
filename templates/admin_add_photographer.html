@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Admin - Add New Photographer">
+    <title>Add Photographer - Perfect Portraits Studio</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="{{ url_for('index') }}" class="brand-logo">
+                <span class="brand-logo-icon">C</span>
+                <span>Perfect Portraits Studio</span>
+            </a>
+            <ul class="navbar-menu">
+                <li><a href="{{ url_for('admin_dashboard') }}" class="nav-link">Dashboard</a></li>
+                <li><a href="{{ url_for('admin_photographers') }}" class="nav-link">Photographers</a></li>
+                <li><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="content-wrapper">
+        <div class="container">
+            <h1>Add New Photographer</h1>
+
+            <div style="background: white; padding: 2rem; border-radius: 4px; max-width: 800px; margin: 0 auto;">
+                <form method="POST" action="{% if editing %}{{ url_for('admin_edit_photographer', photographer_id=photographer.id) }}{% else %}{{ url_for('admin_add_photographer') }}{% endif %}" class="photographer-form">
+                    {% if error %}
+                        <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+                            {{ error }}
+                        </div>
+                    {% endif %}
+
+                    <h3 style="margin-top: 0;">Photographer Details</h3>
+
+                    <div class="form-group">
+                        <label for="name">Full Name <span style="color: red;">*</span></label>
+                        <input type="text" id="name" name="name" placeholder="e.g., John Smith" value="{{ photographer.name if editing }}" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="specialization">Specialization <span style="color: red;">*</span></label>
+                            <input type="text" id="specialization" name="specialization" placeholder="e.g., Wedding Photography" value="{{ photographer.specialization if editing }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="location">Location <span style="color: red;">*</span></label>
+                            <input type="text" id="location" name="location" placeholder="e.g., Mumbai" value="{{ photographer.location if editing }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="rate">Rate (₹) <span style="color: red;">*</span></label>
+                            <input type="number" id="rate" name="rate" placeholder="e.g., 10000" value="{{ photographer.rate if editing }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="experience">Experience (Years) <span style="color: red;">*</span></label>
+                            <input type="number" id="experience" name="experience" placeholder="e.g., 12" value="{{ photographer.experience if editing }}" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contact">Contact Email <span style="color: red;">*</span></label>
+                        <input type="email" id="contact" name="contact" placeholder="e.g., john@photographer.com" value="{{ photographer.contact if editing }}" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="bio">Bio <span style="color: red;">*</span></label>
+                        <textarea id="bio" name="bio" placeholder="Describe the photographer..." rows="3" required>{{ photographer.bio if editing }}</textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="image">Image URL</label>
+                        <input type="url" id="image" name="image" placeholder="e.g., https://example.com/photo.jpg" value="{{ photographer.image if editing }}">
+                        <small>Leave empty for default placeholder image</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="skills">Skills (Comma-separated)</label>
+                        <input type="text" id="skills" name="skills" placeholder="e.g., Wedding Ceremonies, Reception Events, Prenup Shoots" value="{% if editing %}{{ photographer.skills|join(', ') }}{% endif %}">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Availability</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 1rem;">
+                            {% for day in ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'] %}
+                                <label style="display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                                    <input type="checkbox" name="availability" value="{{ day }}" {% if not editing or day in photographer.availability %}checked{% endif %}>
+                                    <span>{{ day }}</span>
+                                </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <hr style="margin: 2rem 0;">
+                    <h3>Login Credentials</h3>
+
+                    <div class="form-group">
+                        <label for="username">Username <span style="color: red;">*</span></label>
+                        <input type="text" id="username" name="username" placeholder="e.g., john_smith" value="{{ current_username if editing }}" required>
+                        <small>Username for photographer login</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">Password {% if not editing %}<span style="color: red;">*</span>{% endif %}</label>
+                        <input type="password" id="password" name="password" placeholder="{% if editing %}Leave blank to keep current password{% else %}Minimum 6 characters{% endif %}" minlength="6" {% if not editing %}required{% endif %}>
+                    </div>
+
+                    <div style="display: flex; gap: 1rem; margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary" style="flex: 1;">{% if editing %}Save Changes{% else %}Add Photographer{% endif %}</button>
+                        <a href="{{ url_for('admin_photographers') }}" class="btn" style="flex: 1; text-align: center; background-color: #95a5a6; color: white; text-decoration: none;">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container" style="text-align: center;">
+            <p>&copy; 2026 Perfect Portraits Studio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <style>
+        .photographer-form {
+            margin-top: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
+        }
+
+        .form-group input[type="text"],
+        .form-group input[type="email"],
+        .form-group input[type="url"],
+        .form-group input[type="number"],
+        .form-group input[type="password"],
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.1);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        .alert-error {
+            background-color: #fadbd8;
+            border-left: 4px solid #e74c3c;
+            padding: 1rem;
+            border-radius: 4px;
+            color: #c0392b;
+        }
+
+        h3 {
+            color: #333;
+            margin-bottom: 1rem;
+        }
+
+        @media (max-width: 600px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>
